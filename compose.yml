@@ -1,0 +1,59 @@
+include:
+  - path: external-dependencies/compose.yml
+
+x-common: &common
+  env_file:
+    - .env.${PROFILE:?err}
+    - .env.common
+
+services:
+
+  notification-service:
+    <<: *common
+    build:
+      context: notification-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      quarkus.mailer.host: mailpit
+      quarkus.mailer.port: 1025
+    depends_on:
+      - mailpit
+
+  order-service:
+    <<: *common
+    build:
+      context: order-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    environment:
+      quarkus.datasource.username: orders
+      quarkus.datasource.password: orders
+      quarkus.datasource.jdbc.url: jdbc:postgresql://orders-db:5432/orders
+      quarkus.hibernate-orm.database.generation: drop-and-create
+    depends_on:
+      - orders-db
+
+  payment-service:
+    <<: *common
+    build:
+      context: payment-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+
+  purchase-order-gateway:
+    <<: *common
+    build:
+      context: purchase-order-gateway
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8082:8080"
+
+  shipment-service:
+    <<: *common
+    build:
+      context: shipment-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+
+  warehouse-service:
+    <<: *common
+    build:
+      context: warehouse-service
+      dockerfile: src/main/docker/Dockerfile.jvm
