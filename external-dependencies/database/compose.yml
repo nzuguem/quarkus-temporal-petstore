@@ -1,0 +1,9 @@
+services:
+
+  orders-db:
+    image: postgres:15
+    container_name: orders-db
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+      POSTGRES_DB: orders

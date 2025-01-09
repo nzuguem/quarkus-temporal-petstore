@@ -1,0 +1,27 @@
+version: 3
+
+tasks:
+  default:
+    desc: List Tasks.
+    cmd: task -l
+
+  build-platform:
+    desc: Build Application.
+    cmd: mvn package
+
+  run-platform/*:
+    vars:
+      PROFILE: '{{index .MATCH 0}}'
+    desc: Run platform.
+    deps:
+      - task: build-platform
+    cmds:
+      - docker compose --env-file .env.{{.PROFILE}} up --wait
+      - docker compose --env-file .env.{{.PROFILE}} logs -f
+
+  stop-platform/*:
+    vars:
+      PROFILE: '{{index .MATCH 0}}'
+    desc: Stop platform with Temporal Cloud.
+    cmd: docker compose --env-file .env.{{.PROFILE}} down
+
